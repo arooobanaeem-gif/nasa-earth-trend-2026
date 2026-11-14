@@ -1,0 +1,2 @@
+variable,season,period,metric,mean_rx1day_mm,min_rx1day_mm,max_rx1day_mm,mk_trend,mk_p,mk_tau,sen_slope_mm_per_year,sen_intercept,tfpw_trend,tfpw_p,raw_lag1,detrended_lag1
+Extreme Precipitation (Rx1day),June–September,2001–2025,Basin mean of pixel-wise JJAS Rx1day,40.219794818766324,27.355734708362355,61.89096020972031,no trend,0.07212432275983494,0.26,0.44034774006741917,34.74007414980749,no trend,0.05004866332140967,0.2218603859127519,0.1471854395114842
