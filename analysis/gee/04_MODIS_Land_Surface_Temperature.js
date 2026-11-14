@@ -214,3 +214,55 @@ Export.table.toDrive({
   fileFormat: 'CSV',
   selectors: ['year', 'lst_celsius']
 });
+
+
+var yearlyImageCounts = ee.FeatureCollection(
+  ee.List.sequence(2001, 2025).map(function(year) {
+    var count = processedLST
+      .filter(ee.Filter.calendarRange(year, year, 'year'))
+      .size();
+
+    return ee.Feature(null, {
+      year: year,
+      image_count: count
+    });
+  })
+);
+
+print('MODIS images per year:', yearlyImageCounts);
+
+
+[2024, 2025].forEach(function(year) {
+  var images = processedLST.filter(
+    ee.Filter.calendarRange(year, year, 'year')
+  );
+
+  var validCount = images.count();
+
+  var coverage = validCount.gt(0).reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: indusGeometry,
+    scale: 5000,
+    maxPixels: 1e9,
+    tileScale: 4
+  });
+
+  print(year + ' basin pixel coverage:', coverage);
+});
+
+
+[2024, 2025].forEach(function(year) {
+  var validCount = processedLST
+    .filter(ee.Filter.calendarRange(year, year, 'year'))
+    .count();
+
+  var stats = validCount.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: indusGeometry,
+    scale: 5000,
+    maxPixels: 1e9,
+    tileScale: 4
+  });
+
+  print(year + ' average valid observations per pixel:', stats);
+});
