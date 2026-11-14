@@ -1,0 +1,2 @@
+variable,season,period,mean_swe_mm,min_swe_mm,max_swe_mm,mk_trend,mk_p,mk_tau,sen_slope_mm_per_year,sen_intercept,tfpw_trend,tfpw_p,raw_lag1,detrended_lag1
+Snow Water Equivalent,May–September,2001–2025,6.14862853647349,3.434369074598936,10.58998224363272,no trend,0.1542575118326619,0.20666666666666667,0.09490397469810294,4.804275962259688,no trend,0.35874300337869447,0.24123520689935776,0.17968301719384
