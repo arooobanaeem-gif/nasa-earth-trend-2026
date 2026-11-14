@@ -41,3 +41,9 @@ Thumbs.db
 # Editor settings
 .vscode/
 .idea/
+
+
+data/indus_basin.geojson
+data/indus_basin_fixed.geojson
+data/indus_basin_dissolved.geojson
+
