@@ -1,0 +1,2 @@
+variable,season,start_year,end_year,mean,mk_trend,mk_p_value,mk_tau,sen_slope_per_year,sen_slope_ci_lower,sen_slope_ci_upper,lag1_autocorrelation,significant_0_05
+MODIS NDSI Snow Cover,May-September,2001,2025,5.584551722543615,no trend,0.44087649866088374,-0.11333333333333333,-0.021044720428215584,-0.06884115076087206,0.022932237074095158,0.09277003507912922,False
