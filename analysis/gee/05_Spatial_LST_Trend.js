@@ -220,3 +220,111 @@ Export.image.toDrive({
   }
 });
 
+
+/*
+ LST SPATIAL TREND QUALITY CHECK
+ Count valid annual observations per pixel
+*/
+
+var validYearCount = annualLST
+  .select('JJAS_LST_Celsius')
+  .count()
+  .clip(indusGeometry);
+
+print('Valid annual observation count:', validYearCount);
+
+Map.addLayer(
+  validYearCount,
+  {
+    min: 1,
+    max: 25,
+    palette: ['red', 'orange', 'yellow', 'green']
+  },
+  'LST Valid Years (2001–2025)',
+  false
+);
+
+var yearCountStats = validYearCount.reduceRegion({
+  reducer: ee.Reducer.minMax(),
+  geometry: indusGeometry,
+  scale: 1000,
+  maxPixels: 1e9,
+  tileScale: 4
+});
+
+print('Minimum and maximum valid years:', yearCountStats);
+
+
+/*
+ QUALITY CHECK — VALID ANNUAL OBSERVATIONS
+ Count pixels with fewer than 20 valid years
+*/
+
+var insufficientYears = validYearCount.lt(20)
+  .and(validYearCount.gt(0));
+
+var extremeSlope = spatialLSTTrend.abs().gt(1);
+
+var qualityCounts = ee.Image.cat([
+  insufficientYears.rename('under_20_years'),
+  extremeSlope.rename('extreme_slope'),
+  insufficientYears.and(extremeSlope)
+    .rename('extreme_and_under_20')
+]).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: indusGeometry,
+  scale: 1000,
+  maxPixels: 1e9,
+  tileScale: 4
+});
+
+print('LST spatial quality counts:', qualityCounts);
+
+
+/*
+ QUALITY-FILTERED SPATIAL LST TREND
+ Retain pixels with at least 20 valid annual observations
+*/
+
+var lstTrendQualityFiltered = spatialLSTTrend
+  .updateMask(validYearCount.gte(20))
+  .rename('LST_Sen_Slope_QC');
+
+Map.addLayer(
+  lstTrendQualityFiltered,
+  {
+    min: -0.15,
+    max: 0.15,
+    palette: [
+      '2166ac',
+      '67a9cf',
+      'f7f7f7',
+      'ef8a62',
+      'b2182b'
+    ]
+  },
+  'LST Sen Slope — QC ≥20 Years'
+);
+
+print('Quality-filtered LST trend:', lstTrendQualityFiltered);
+
+
+/*
+ EXPORT QUALITY-FILTERED LST SPATIAL TREND
+ 2001–2025 | °C/year
+ Minimum 20 valid annual observations
+*/
+
+Export.image.toDrive({
+  image: lstTrendQualityFiltered.toFloat(),
+  description: 'Indus_JJAS_LST_Sen_Slope_QC_2001_2025',
+  folder: 'NASA_Earth_Trend_2026',
+  fileNamePrefix: 'indus_jjas_lst_sen_slope_qc_2001_2025',
+  region: indusGeometry,
+  scale: 1000,
+  maxPixels: 1e9,
+  fileFormat: 'GeoTIFF',
+  formatOptions: {
+    noData: -9999
+  }
+});
