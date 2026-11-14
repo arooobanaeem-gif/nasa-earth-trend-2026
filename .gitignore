@@ -1,0 +1,43 @@
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Environment variables and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+service-account*.json
+
+# Climate and geospatial data
+*.tif
+*.tiff
+*.nc
+*.hdf
+*.h5
+*.grib
+*.grb
+*.parquet
+
+# Node.js / React
+node_modules/
+dist/
+build/
+.next/
+
+# Temporary files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Editor settings
+.vscode/
+.idea/
