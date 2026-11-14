@@ -1,0 +1,30 @@
+
+name: trend
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.11
+  - earthengine-api
+  - netcdf4
+  - pyarrow
+  - xarray
+  - matplotlib
+  - rioxarray
+  - scipy
+  - geemap
+  - jupyterlab
+  - geopandas
+  - rasterio
+  - pandas
+  - statsmodels
+  - pip
+  - pip:
+      - pymannkendall==1.4.3
+      - pyhomogeneity==1.1
+      - fastapi==0.162.7
+      - uvicorn==0.54.0
+      - python-dotenv==1.2.4
+      - earthaccess==0.17.0
