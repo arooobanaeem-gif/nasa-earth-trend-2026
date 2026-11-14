@@ -1,0 +1,2 @@
+period,season,variable,mean_celsius,mk_trend,mk_p_value,mk_tau,sen_slope_celsius_per_year,sen_ci_lower,sen_ci_upper,lag1_autocorrelation
+2001-2025,JJAS,MODIS daytime LST,28.79927872689585,no trend,0.387514377839314,-0.12666666666666668,-0.017358823541300694,-0.07450878062892397,0.023282620439822654,0.08958380154171239
