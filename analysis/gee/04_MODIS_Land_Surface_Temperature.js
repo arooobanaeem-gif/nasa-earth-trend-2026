@@ -114,3 +114,103 @@ Map.addLayer(
 );
 
 print('2022 LST image:', lst2022);
+
+
+/*
+ STEP 4.4 — ANNUAL JJAS LAND SURFACE TEMPERATURE
+ Study period: 2001–2025
+ Units: degrees Celsius
+*/
+
+// Generate annual JJAS temperature composites
+var years = ee.List.sequence(2001, 2025);
+
+var annualLST = ee.ImageCollection.fromImages(
+  years.map(function(year) {
+    year = ee.Number(year);
+
+    var yearlyLST = processedLST.filter(
+      ee.Filter.calendarRange(year, year, 'year')
+    );
+
+    var seasonalMean = yearlyLST
+      .mean()
+      .rename('JJAS_LST_Celsius');
+
+    return seasonalMean.set({
+      year: year,
+      'system:time_start': ee.Date.fromYMD(year, 6, 1).millis()
+    });
+  })
+);
+
+// Verify annual collection
+print('Number of annual LST images:', annualLST.size());
+
+print('Annual LST years:', annualLST.aggregate_array('year'));
+
+print('First annual LST image:', annualLST.first());
+
+
+/*
+ STEP 4.4.2 — BASIN-WIDE ANNUAL JJAS LST
+ 2001–2025 | Celsius
+*/
+
+// Calculate spatial mean for each annual image
+var basinLSTSeries = ee.FeatureCollection(
+  annualLST.map(function(image) {
+
+    var meanLST = image.reduceRegion({
+      reducer: ee.Reducer.mean(),
+      geometry: indusGeometry,
+      scale: 5000,
+      maxPixels: 1e9,
+      tileScale: 4
+    });
+
+    return ee.Feature(null, {
+      year: image.get('year'),
+      lst_celsius: meanLST.get('JJAS_LST_Celsius')
+    });
+  })
+);
+
+// Print annual temperature values
+print(
+  'Basin-wide annual JJAS LST:',
+  basinLSTSeries.sort('year')
+);
+
+// Create temperature time-series chart
+var lstChart = ui.Chart.feature.byFeature({
+  features: basinLSTSeries.sort('year'),
+  xProperty: 'year',
+  yProperties: ['lst_celsius']
+})
+.setChartType('LineChart')
+.setOptions({
+  title: 'Indus Basin JJAS Daytime LST (2001–2025)',
+  hAxis: {title: 'Year'},
+  vAxis: {title: 'Mean daytime land surface temperature (°C)'},
+  lineWidth: 2,
+  pointSize: 4,
+  legend: {position: 'none'}
+});
+
+print(lstChart);
+
+
+/*
+ EXPORT ANNUAL JJAS LAND SURFACE TEMPERATURE
+ Indus Basin | 2001–2025
+*/
+
+Export.table.toDrive({
+  collection: basinLSTSeries,
+  description: 'Indus_JJAS_LST_2001_2025',
+  folder: 'NASA_Earth_Trend_2026',
+  fileNamePrefix: 'indus_jjas_lst_2001_2025',
+  fileFormat: 'CSV',
+  selectors: ['year', 'lst_celsius']
+});
