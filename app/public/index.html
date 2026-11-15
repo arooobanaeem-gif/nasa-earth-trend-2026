@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Indus Trend Detective</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--bg:#f6f5f1;--card:#fcfcfb;--ink:#17222e;--ink2:#4a5866;--muted:#7b8794;--line:#dedbd2;--accent:#0f5e7a;--accent2:#b4530a;--a:#2a6fb0;--b:#d1661f;--good:#1f7a4d;--warn:#9a6700;--soft:#eceae3}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3{margin:0;line-height:1.2}h2{font-size:21px}h3{font-size:16px}
+header{position:sticky;top:0;z-index:900;background:#102a3a;color:#fff;display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 20px}
+header .brand{font-weight:700;font-size:18px;letter-spacing:.2px}header .brand small{display:block;font-weight:400;font-size:12px;opacity:.75}
+header .sp{flex:1}
+.seg{display:inline-flex;border:1px solid rgba(255,255,255,.35);border-radius:8px;overflow:hidden}
+.seg button{background:transparent;color:#fff;border:0;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer}
+.seg button.on{background:#fff;color:#102a3a;font-weight:600}
+main{max-width:1280px;margin:0 auto;padding:18px 16px 120px}
+section{margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;align-items:stretch}
+.hero h1{font-size:30px;margin-bottom:8px}.hero p{color:var(--ink2);margin:6px 0}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
+.btn.alt{background:#fff;color:var(--accent);border:1px solid var(--accent)}.btn.sm{padding:5px 10px;font-size:13px}
+.btn:hover{filter:brightness(1.08)}
+.cases{display:grid;gap:10px}
+.case{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.case:hover{border-color:var(--accent)}.case b{display:block}.case span{color:var(--ink2);font-size:13px}
+.case .play{flex:none;width:34px;height:34px;border-radius:50%;background:var(--accent2);color:#fff;display:grid;place-items:center;font-size:14px}
+.q{display:grid;grid-template-columns:210px 1fr;gap:8px 14px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.q:last-of-type{border-bottom:0}.q label{font-weight:600}.q label small{display:block;font-weight:400;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font:inherit;font-size:13.5px;cursor:pointer;color:var(--ink)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+select{font:inherit;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:10px;margin-top:10px}
+.ev{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;cursor:pointer;text-align:left;font:inherit;color:inherit;display:flex;flex-direction:column;gap:5px}
+.ev.on{outline:2px solid var(--accent);border-color:var(--accent)}.ev:hover{border-color:var(--accent)}
+.ev .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.ev b{font-size:14.5px}
+.ev p{margin:0;font-size:12.5px;color:var(--ink2)}.ev .why{color:var(--muted);font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 8px;font-size:11.5px;font-weight:600;white-space:nowrap;border:1px solid}
+.badge.strong{color:var(--good);border-color:#9fd0b6;background:#eaf6ef}.badge.emerging{color:var(--warn);border-color:#e3cf94;background:#fbf5df}.badge.weak,.badge.none{color:var(--ink2);border-color:var(--line);background:var(--soft)}
+.tag{font-size:11px;border-radius:5px;padding:1px 6px;background:var(--soft);color:var(--ink2)}
+.inv{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#map{height:470px;border-radius:10px;border:1px solid var(--line);background:#e9edf0}
+.legend{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);margin-top:8px;flex-wrap:wrap}
+.legend .bar{width:190px;height:11px;border-radius:6px;border:1px solid var(--line)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.verdict{border-left:5px solid var(--muted);padding:10px 14px;background:#fff;border-radius:8px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.verdict.sig{border-left-color:var(--good)}.verdict.ns{border-left-color:var(--warn)}
+.verdict h3{margin-bottom:4px}.verdict p{margin:4px 0;color:var(--ink2)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 9px}.stat small{display:block;color:var(--muted);font-size:11.5px}.stat b{font-size:15px}
+.note{font-size:12.5px;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+details{border-top:1px solid var(--line);padding:9px 0}summary{cursor:pointer;font-weight:600}
+dl{margin:8px 0;display:grid;grid-template-columns:190px 1fr;gap:6px 14px}dt{font-weight:600}dd{margin:0;color:var(--ink2)}
+/* chat */
+#chatBtn{position:fixed;right:18px;bottom:18px;z-index:1200;border-radius:999px;padding:12px 18px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#chat{position:fixed;right:18px;bottom:18px;z-index:1300;width:400px;max-width:calc(100vw - 24px);height:560px;max-height:calc(100vh - 90px);background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.28);display:none;flex-direction:column;overflow:hidden}
+#chat.open{display:flex}
+#chat .hd{background:#102a3a;color:#fff;padding:10px 14px;display:flex;align-items:center;gap:8px}#chat .hd b{flex:1}#chat .hd button{background:none;border:0;color:#fff;font-size:18px;cursor:pointer}
+#chat .mode{font-size:11px;border-radius:999px;padding:1px 8px;background:rgba(255,255,255,.18)}
+#msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:92%;padding:8px 11px;border-radius:12px;white-space:pre-wrap;font-size:14px}
+.msg.u{align-self:flex-end;background:var(--accent);color:#fff}.msg.a{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+.steps{display:flex;flex-direction:column;gap:3px;margin-bottom:6px}.step{font:12px ui-monospace,Consolas,monospace;color:var(--ink2);background:var(--soft);border-radius:6px;padding:2px 7px}
+.ground{margin-top:6px;font-size:12px;font-weight:600}.ground.ok{color:var(--good)}.ground.bad{color:var(--warn)}
+#chat form{display:flex;gap:6px;padding:10px;border-top:1px solid var(--line)}#chat input{flex:1;font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line)}
+#sugg{padding:0 10px 6px;display:flex;gap:5px;flex-wrap:nowrap;overflow-x:auto}#sugg .chip{font-size:12px;padding:3px 9px;white-space:nowrap;flex:none}
+/* demo player */
+#demo{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:1250;width:min(820px,calc(100vw - 24px));background:#102a3a;color:#fff;border-radius:14px;padding:13px 16px;box-shadow:0 12px 36px rgba(0,0,0,.35);display:none}
+#demo.on{display:block}#demo .t{font-size:12px;opacity:.75;text-transform:uppercase;letter-spacing:.6px}#demo p{margin:4px 0 9px;font-size:16.5px;line-height:1.4}
+#demo .ctl{display:flex;gap:8px;align-items:center}#demo .dots{flex:1;display:flex;gap:5px}#demo .dots i{width:22px;height:4px;border-radius:2px;background:rgba(255,255,255,.3)}#demo .dots i.on{background:#f0a35c}
+#demo button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:7px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer}
+footer{color:var(--muted);font-size:12.5px;text-align:center;padding:10px}
+@media(max-width:900px){.hero,.inv{grid-template-columns:1fr}.q{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}dl{grid-template-columns:1fr}#map{height:360px}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Figtree:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="skin.css">
+</head>
+<body>
+<header>
+  <div class="brand">Indus Trend Detective<small>Earth System Investigation · 2001–2025</small></div>
+  <div class="sp"></div>
+  <div class="who"><span class="lvlab">Explore as</span>
+  <div class="seg" id="levelSeg" role="group" aria-label="Choose how the site explains things"><button data-l="student" title="Playful: guessing game, quiz and simple words">Student</button><button data-l="public" class="on" title="Plain-language summaries and a check for your own area">Curious citizen</button><button data-l="scientist" title="Full statistics, method names and data downloads">Scientist</button></div></div>
+</header>
+<section class="landing" id="landing">
+  <div class="rain" aria-hidden="true"></div>
+  <div class="land-in">
+    <div class="land-copy">
+      <p class="hand">Case file · The Indus Basin investigation · 2001–2025</p>
+      <h1>Is the river<br>really <em>changing</em>?</h1>
+      <p class="lede">Pakistan's devastating floods raise urgent questions. But individual events don't establish a long-term trend. Explore 25 years of Earth observation data to uncover what's changing across the Indus Basin, and what remains uncertain.</p>
+      <div class="row land-cta"><a class="btn big" href="#interview">Open a case</a><button class="btn ghost big" id="askHero">Ask the detective</button></div>
+      <div class="facts"><div><b data-count="25">0</b><span>Years of Evidence</span></div><div><b data-count="12">0</b><span>Earth System Indicators</span></div><div><b data-count="7">0</b><span>Environmental Variables</span></div><div><b data-count="3">0</b><span>Regional Comparisons</span></div></div>
+    </div>
+    <div class="land-art">
+      <svg id="riverArt" viewBox="0 0 520 480" role="img" aria-label="Outline of the Indus Basin with the river's course"></svg>
+    </div>
+  </div>
+  <a class="scrollcue" href="#files" aria-label="Scroll down"><span></span></a>
+</section>
+<main>
+  <section class="m2p" id="m2p">
+    <div class="m2p-copy"><p class="hand">From mountains to plains</p><h2>One basin. Interconnected Earth systems.</h2><p>From the snow-covered Karakoram to Pakistan's downstream floodplains, investigate how precipitation, temperature, snow, and water-related conditions vary across the Indus Basin.</p></div>
+    <svg class="m2p-art" viewBox="0 0 600 170" role="img" aria-label="Profile of the basin from high mountains down to the plains"><defs><linearGradient id="m2pg" x1="0" x2="1"><stop offset="0" stop-color="#0b3d66"/><stop offset=".55" stop-color="#0c6fa6"/><stop offset="1" stop-color="#c9a45c"/></linearGradient></defs><path class="land" d="M0 170 L0 78 L38 22 L66 62 L98 12 L136 72 L166 44 L206 98 L250 84 L300 118 L370 128 L460 137 L600 143 L600 170Z" fill="url(#m2pg)"/><path class="snow" d="M27 38 L38 22 L47 36 L38 32Z M86 30 L98 12 L109 29 L98 24Z M157 56 L166 44 L174 55 L166 52Z" fill="#fff"/><path class="stream" d="M98 14 C120 70 190 96 250 86 S400 132 600 145" fill="none"/><text x="20" y="160">Karakoram and Himalaya</text><text x="300" y="160">Punjab plains</text><text x="592" y="160" text-anchor="end">Sindh floodplain</text></svg>
+  </section>
+  <section class="files" id="files">
+    <div class="files-head"><h2>Not sure where to start? Follow a solved case.</h2><p>Each one walks through the tool by itself, one captioned step at a time. You can pause, skip ahead or leave whenever you like.</p></div>
+    <div class="cases" id="cases"></div>
+  </section>
+
+  <section class="card" id="interview">
+    <div class="kicker">Start here</div>
+    <h2>Open your own case: three short questions</h2>
+    <p class="note">Your answers are used to search the data variables and rank the ones most likely to show a trend.</p>
+    <div id="wizard"></div>
+    <div class="searchrow"><b>Search the data variables:</b><input id="varSearch" type="text" placeholder="type a word: rain, drought, glacier, river, heat…" autocomplete="off"></div>
+    <h3 style="margin-top:12px" id="boardTitle">Evidence board</h3>
+    <p class="note">Variables are ranked by your topic, the character of the region and a quick trend test. Click a card to investigate it.</p>
+    <div class="board" id="board"></div>
+    <div class="blegend"><span><span class="badge strong">✓ Proven trend</span> passes the significance test (p below 0.05)</span><span><span class="badge emerging">◐ Possible trend</span> leans one way but could still be chance (p between 0.05 and 0.20)</span><span><span class="badge weak">○ No clear trend yet</span> year-to-year ups and downs dominate (p above 0.20)</span></div>
+  </section>
+
+  <section id="investigation">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h2 id="invTitle">Investigation</h2>
+      <div class="row"><select id="selVar"></select><select id="selRegion"></select></div>
+    </div>
+    <div class="inv">
+      <div class="card">
+        <h3>Where is it changing?</h3>
+        <p class="note" id="mapNote">Click anywhere in the basin to read the local rate of change.</p>
+        <div id="map"></div>
+        <div class="legend" id="legend"></div>
+        <button class="btn alt sm" id="dlMap" type="button" style="margin-top:10px">Download this map (PNG)</button>
+      </div>
+      <div class="card">
+        <h3 id="chartTitle">What is changing, and how fast?</h3>
+        <div id="chart" style="height:290px"></div>
+        <div class="row" style="margin:2px 0 10px"><span class="note" style="flex:none" id="winLabel"></span><input type="range" id="winSlider" min="2001" max="2016" step="1" value="2001" aria-label="First year of the record used"></div>
+        <div class="verdict" id="verdict"></div>
+        <div class="stats" id="stats"></div>
+        <p class="note" id="robust" style="margin-top:8px"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="levelPanel"></section>
+
+  <section class="card" id="compare">
+    <div class="row" style="justify-content:space-between"><h2>Same process, different places</h2><select id="selCmp"></select></div>
+    <p class="note" id="cmpBlurb"></p>
+    <div class="inv" style="margin-top:8px"><div id="cmpChart" style="height:280px"></div><div id="cmpText"></div></div>
+  </section>
+
+  <section class="card" id="story">
+    <div class="row" style="justify-content:space-between"><h2>An extreme year is not a trend</h2><div class="chips" id="yearChips"></div></div>
+    <p class="note" id="storyNote"></p>
+    <div id="anomChart" style="height:260px"></div>
+  </section>
+
+  <section class="card" id="notebook">
+    <h2>Detective's notebook</h2>
+    <details open><summary>The 12 indicators</summary><dl id="defs"></dl></details>
+    <details><summary>Statistics glossary</summary><dl>
+      <dt>Trend</dt><dd>A steady rise or fall over many years, beyond the normal ups and downs from one year to the next. We test straight-line (linear) trends.</dd>
+      <dt>Rate of change (Sen's slope)</dt><dd>How much the indicator changes per year. Sen's slope is the middle value of the slopes between every pair of years, so one extreme year (like 2022) cannot dominate it.</dd>
+      <dt>Mann-Kendall test</dt><dd>Counts how often later years are higher than earlier years. It does not assume the data follow a bell curve, which suits rainfall and runoff.</dd>
+      <dt>t-test</dt><dd>Tests whether the ordinary least-squares trend line is steeper than chance would produce. We show it next to Mann-Kendall as a cross-check.</dd>
+      <dt>p-value</dt><dd>The chance of seeing a trend this strong if nothing were really changing. Below 0.05 is the usual bar for "statistically significant".</dd>
+      <dt>95% confidence interval</dt><dd>The range that plausibly contains the true rate of change. If it includes zero, the trend is not significant.</dd>
+      <dt>Autocorrelation</dt><dd>When one year resembles the year before (soil moisture has memory). It makes trends look more certain than they are, so p-values are adjusted for it (Yue-Wang lag-1 correction).</dd>
+      <dt>FDR (q-value)</dt><dd>When many tests run at once, some pass by luck. The Benjamini-Hochberg false discovery rate correction guards against that for the regional comparisons.</dd>
+      <dt>Years to detect</dt><dd>An estimate of how long a record must be before a trend of this size can stand out from natural variability (Weatherhead et al., 1998). Sometimes all a trend needs is more time.</dd>
+      <dt>Anomaly</dt><dd>How far one year is from the 2001–2025 average for the same region.</dd>
+      <dt>JJAS</dt><dd>June to September: the monsoon and peak-melt season, when Indus floods happen.</dd>
+    </dl></details>
+    <details><summary>Method and limitations</summary>
+      <p>Seasonal values (June–September, or May–September for snow) were computed for each year 2001–2025 for the Indus Basin (HydroBASINS) and for three regional splits. Trends use Sen's slope and the Mann-Kendall test, with a lag-1 autocorrelation adjustment and Benjamini-Hochberg FDR control for regional difference tests. The record-length slider recalculates the tests in your browser and is exploratory; headline verdicts always use the science team's validated 2001–2025 results.</p>
+      <p><b>Limits.</b> Map colours show the rate of change in each pixel, not significance. FLDAS runoff, soil moisture and snow water equivalent are model estimates, and runoff is not measured river discharge. MODIS land surface temperature is not air temperature. The snow-cover index is not percent snow cover. 25 years is a short climate record. The app explains background trends; it does not predict individual floods.</p>
+    </details>
+    <details><summary>Data and credits</summary>
+      <p><b>NASA:</b> GPM IMERG V07 (precipitation, Rx1day), MODIS MOD11A2 (land surface temperature), MODIS MOD10A1 (snow cover), FLDAS (runoff, soil moisture, snow water equivalent). <b>Other:</b> HydroBASINS / HydroSHEDS (WWF) basin boundaries, processed in Google Earth Engine. Base map © OpenStreetMap contributors.</p>
+      <p><b>Use of AI (SI) disclosure.</b> <span id="siMode"></span> AI assistants were used to accelerate coding; the science questions, region and analysis design are the team's own. No AI-generated imagery is used.</p>
+    </details>
+  </section>
+  <footer>Built for the NASA Space Apps Challenge 2026: "Be an Earth System Trend Detective!"</footer>
+</main>
+
+<button class="btn" id="chatBtn">🔎 Ask the AI detective</button>
+<div id="chat" role="dialog" aria-label="Trend detective">
+  <div class="hd"><b id="chatTitle">Trend Detective</b><span class="mode" id="chatMode">…</span><button id="chatClose" aria-label="Close">×</button></div>
+  <div id="msgs"></div>
+  <div id="sugg"></div>
+  <form id="chatForm"><input id="chatInput" placeholder="Ask about floods, heat, snow, soil, a place…" autocomplete="off"><button class="btn sm">Ask</button></form>
+</div>
+<div id="demo"><div class="t" id="demoT"></div><p id="demoP"></p><div class="ctl"><div class="dots" id="demoDots"></div><button id="demoPause">Pause</button><button id="demoNext">Next ›</button><button id="demoExit">Exit</button></div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.plot.ly/plotly-basic-2.35.2.min.js"></script>
+<script src="shared.js"></script>
+<script src="modes.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

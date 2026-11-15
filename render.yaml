@@ -1,0 +1,12 @@
+# Render blueprint for the Indus Trend Detective web app (app/ folder).
+services:
+  - type: web
+    name: indus-trend-detective
+    runtime: node
+    plan: free
+    rootDir: app
+    buildCommand: npm install --omit=dev
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
